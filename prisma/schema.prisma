@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  password String
+  name     String
+  otps     OTP[]
+  logs     AuthLog[]
+}
+
+model OTP {
+  id        Int      @id @default(autoincrement())
+  code      String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+}
+
+model AuthLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  event     String
+  timestamp DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
