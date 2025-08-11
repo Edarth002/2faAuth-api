@@ -1,19 +1,19 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const { PrismaClient } = require('@prisma/client');
+require("dotenv").config();
+import express, { json } from "express";
+import cors from "cors";
+import { PrismaClient } from "@prisma/client";
 
-const authRoutes = require('./routes/authRoutes');
-const otpRoutes = require('./routes/otpRoutes');
+import authRoutes from "./routes/authRoutes";
+import otpRoutes from "./routes/otpRoutes";
 
 const prisma = new PrismaClient();
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(json());
 
-app.use('/api', authRoutes);
-app.use('/api', otpRoutes);
+app.use("/api", authRoutes);
+app.use("/api", otpRoutes);
 
 app.listen(process.env.PORT || 5000, () => {
-  console.log('Server running');
+  console.log("Server running");
 });
