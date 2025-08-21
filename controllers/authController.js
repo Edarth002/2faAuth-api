@@ -1,26 +1,31 @@
 // controllers/authController.js
-import { user as _user, otp as _otp } from "../prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { hash, compare } from "bcrypt";
 import jwt from "jsonwebtoken";
-import generateOTP from "../utils/generateOTP";
-import sendMail from "../utils/sendMail";
+import generateOTP from "../utils/generateOTP.js";
+import sendMail from "../utils/sendMail.js";
+
+const prisma = new PrismaClient();
 
 export async function register(req, res) {
   try {
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
 
-    const existingUser = await _user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser)
       return res.status(400).json({ message: "Email already registered" });
 
     const hashedPassword = await hash(password, 10);
-    const user = await _user.create({
-      data: { email, password: hashedPassword },
+
+    const user = await prisma.user.create({
+      data: { name, email, password: hashedPassword },
     });
 
-    res
-      .status(201)
-      .json({ message: "User registered successfully", userId: user.id });
+    res.status(201).json({
+      message: "User registered successfully",
+      userId: user.id,
+      name: user.name,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -31,7 +36,7 @@ export async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    const user = await _user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user)
       return res.status(400).json({ message: "Invalid email or password" });
 
@@ -41,12 +46,12 @@ export async function login(req, res) {
 
     // Generate OTP
     const otp = generateOTP();
-    const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-    await _otp.create({
+    await prisma.oTP.create({
       data: {
         code: otp,
-        expiry,
+        expiresAt,
         userId: user.id,
       },
     });

@@ -1,13 +1,16 @@
-import { otp as _otp } from "../prisma/client";
-import { sign } from "jsonwebtoken";
+// controllers/otpController.js
+import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
+
+const prisma = new PrismaClient();
 
 export async function verifyOTP(req, res) {
   try {
     const { userId, otp } = req.body;
 
-    const otpRecord = await _otp.findFirst({
+    const otpRecord = await prisma.oTP.findFirst({
       where: { userId, code: otp },
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
     });
 
     if (!otpRecord) return res.status(400).json({ message: "Invalid OTP" });
@@ -17,10 +20,12 @@ export async function verifyOTP(req, res) {
     }
 
     // OTP valid, generate JWT
-    const token = sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     // Delete OTP after verification
-    await _otp.delete({ where: { id: otpRecord.id } });
+    await prisma.oTP.delete({ where: { id: otpRecord.id } });
 
     res.status(200).json({ message: "OTP verified", token });
   } catch (err) {
