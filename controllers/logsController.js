@@ -31,16 +31,17 @@ export async function getLogs(req, res) {
       orderBy: { timestamp: "desc" },
       include: {
         user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
+          select: { email: true },
         },
       },
     });
 
-    res.json(logs);
+    const formatted = logs.map((log) => ({
+      ...log,
+      user: log.user ? log.user.email : null,
+    }));
+
+    res.json(formatted);
   } catch (err) {
     console.error("Fetch logs failed:", err);
     res.status(500).json({ message: "Server error" });
