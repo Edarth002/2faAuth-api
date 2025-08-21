@@ -29,27 +29,20 @@ export async function getLogs(req, res) {
   try {
     const logs = await prisma.activityLog.findMany({
       orderBy: { timestamp: "desc" },
-      take: 50,
       include: {
-        user: { select: { id: true, email: true, name: true } },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
       },
     });
 
-    res.json(
-      logs.map((log) => ({
-        id: log.id,
-        timestamp: log.timestamp,
-        action: log.action,
-        details: log.details,
-        status: log.status,
-        ip: log.ip,
-        user: log.user
-          ? { id: log.user.id, email: log.user.email, name: log.user.name }
-          : null,
-      }))
-    );
+    res.json(logs);
   } catch (err) {
-    console.error("Fetch logs error:", err);
+    console.error("Fetch logs failed:", err);
     res.status(500).json({ message: "Server error" });
   }
 }
