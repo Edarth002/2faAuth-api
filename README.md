@@ -30,6 +30,6 @@ A backend API for handling Two-Factor Authentication (2FA), designed to integrat
 ### Installation
 
 ```bash
-git clone https://github.com/Edarth002/2fa-auth-api.git
-cd 2fa-auth-api
+git clone https://github.com/Edarth002/2faAuth-api.git
+cd 2faAuth-api
 npm install
