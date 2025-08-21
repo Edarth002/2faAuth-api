@@ -8,9 +8,9 @@ export async function verifyOTP(req, res) {
   try {
     const { userId, otp } = req.body;
 
-    const otpRecord = await prisma.otp.findFirst({
+    const otpRecord = await prisma.oTP.findFirst({
       where: { userId, code: otp },
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
     });
 
     if (!otpRecord) return res.status(400).json({ message: "Invalid OTP" });
@@ -25,7 +25,7 @@ export async function verifyOTP(req, res) {
     });
 
     // Delete OTP after verification
-    await prisma.otp.delete({ where: { id: otpRecord.id } });
+    await prisma.oTP.delete({ where: { id: otpRecord.id } });
 
     res.status(200).json({ message: "OTP verified", token });
   } catch (err) {
