@@ -13,7 +13,7 @@ model User {
   password String
   name     String
   otps     OTP[]
-  logs     AuthLog[]
+  logs     ActivityLog[]
 }
 
 model OTP {
@@ -24,10 +24,17 @@ model OTP {
   userId    Int
 }
 
-model AuthLog {
+
+model ActivityLog {
   id        Int      @id @default(autoincrement())
-  userId    Int
-  event     String
+  action    String
+  details   String
   timestamp DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  ip        String?
+  status    String?  @default("SUCCESS")
+
+  @@index([timestamp])
+  @@map("activity_logs")
 }
