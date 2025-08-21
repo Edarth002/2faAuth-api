@@ -1,20 +1,22 @@
 // controllers/authController.js
-import { user as _user, otp as _otp } from "../prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { hash, compare } from "bcrypt";
 import jwt from "jsonwebtoken";
-import generateOTP from "../utils/generateOTP";
-import sendMail from "../utils/sendMail";
+import generateOTP from "../utils/generateOTP.js";
+import sendMail from "../utils/sendMail.js";
+
+const prisma = new PrismaClient();
 
 export async function register(req, res) {
   try {
     const { email, password } = req.body;
 
-    const existingUser = await _user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser)
       return res.status(400).json({ message: "Email already registered" });
 
     const hashedPassword = await hash(password, 10);
-    const user = await _user.create({
+    const user = await prisma.user.create({
       data: { email, password: hashedPassword },
     });
 
@@ -31,7 +33,7 @@ export async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    const user = await _user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user)
       return res.status(400).json({ message: "Invalid email or password" });
 
@@ -43,7 +45,7 @@ export async function login(req, res) {
     const otp = generateOTP();
     const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-    await _otp.create({
+    await prisma.otp.create({
       data: {
         code: otp,
         expiry,
