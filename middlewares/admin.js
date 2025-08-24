@@ -1,8 +1,8 @@
 // middleware/adminOnly.js
 import jwt from "jsonwebtoken";
 
-// ✅ Whitelisted admin emails
-const adminEmails = ["dante@example.com", "arthuronyeanusi@gmail.com"];
+// ✅ Whitelisted admin user IDs
+const adminUserIds = [1, 2]; // example: userId 1 and 2 are admins
 
 export function adminOnly(req, res, next) {
   try {
@@ -16,15 +16,15 @@ export function adminOnly(req, res, next) {
       return res.status(401).json({ message: "Invalid token format" });
     }
 
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded JWT payload:", decoded);
 
-    // Check email
-    if (!adminEmails.includes(decoded.email)) {
+    // ✅ Check userId instead of email
+    if (!decoded.userId || !adminUserIds.includes(decoded.userId)) {
+      console.warn("Forbidden: user not admin →", decoded.userId);
       return res.status(403).json({ message: "Access denied" });
     }
 
-    // Attach user info and continue
     req.user = decoded;
     next();
   } catch (err) {
