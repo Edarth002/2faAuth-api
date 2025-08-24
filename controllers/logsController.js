@@ -36,10 +36,21 @@ export async function getLogs(req, res) {
       },
     });
 
-    const formatted = logs.map((log) => ({
-      ...log,
-      user: log.user ? log.user.email : null,
-    }));
+    const formatted = logs.map((log) => {
+      let email = null;
+
+      if (log.user && log.user.email) {
+        email = log.user.email; // from relation
+      } else if (log.details && log.details.startsWith("User: ")) {
+        // fallback: extract from details string
+        email = log.details.replace("User: ", "").trim();
+      }
+
+      return {
+        ...log,
+        user: email,
+      };
+    });
 
     res.json(formatted);
   } catch (err) {
