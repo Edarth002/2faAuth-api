@@ -1,5 +1,6 @@
 import express from "express";
 import { createLog, getLogs } from "../controllers/logsController.js";
+import { adminOnly } from "../middlewares/admin.js";
 
 const router = express.Router();
 
@@ -7,6 +8,6 @@ const router = express.Router();
 router.post("/auth/logs", createLog);
 
 // GET /api/logs → fetch logs
-router.get("/auth/logs", getLogs);
+router.get("/auth/logs", adminOnly, getLogs);
 
 export default router;
